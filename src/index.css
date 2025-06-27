@@ -1,0 +1,19 @@
+*{
+    margin: 0;
+    font-family: sans-serif;
+
+}
+/* في ملف styles.css أو ملف الـ component */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+button:active{
+  transform: scale(0.9);
+}
