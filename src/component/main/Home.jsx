@@ -1,25 +1,25 @@
 import "./Home.css";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { LinearProgress, Pagination, Rating, Stack } from "@mui/material";
 import axios from "axios";
 // import Between from "./Between";
 import About from "../../component/about/About";
 import Footer from "../../component/footer/Footer";
-import Header from "../../component/header/Header";
+
 import { Link } from "react-router-dom";
 import ReactPaginate from "react-paginate";
+import { MdOutlineShoppingCart } from "react-icons/md";
+import Product from "./Product";
+import { CartContext } from "../../_context/CartContext";
+import Header from "../../component/header/Header";
 
-const images = [
-  
-  "/shop2.jpg",
-  "/shop.jpg",
-  "/shop3.jpg",
-];
+
+const images = ["/shop2.webp", "/shop.webp", "/shop3.webp"];
 // @ts-ignore
 const Home = () => {
   const [data, setData] = useState([]);
   const [filter1, setFilter1] = useState([]);
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("All Item");
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 10;
   const pageCount = Math.ceil(filter1.length / itemsPerPage);
@@ -28,6 +28,7 @@ const Home = () => {
   const handlePageClick = (event) => {
     setCurrentPage(event.selected);
   };
+
   // /public
   useEffect(() => {
     axios
@@ -42,21 +43,17 @@ const Home = () => {
       });
   }, []);
 
-  const [cart, setCart] = useState(() => {
-    const savedCart = localStorage.getItem("cart");
-    return savedCart ? JSON.parse(savedCart) : [];
-  });
+const { carts, setCarts } = useContext(CartContext);
   const addToCart = (product) => {
-    const exists = cart.find((item) => item.title === product.title);
+    const exists = carts.find((item) => item.title === product.title);
     if (!exists) {
-      setCart([...cart, product]);
-      //   setCheck([...cart, product])
+      setCarts([...carts, product]);
     }
   };
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
-  console.log(cart);
+    localStorage.setItem("cart", JSON.stringify(carts));
+  }, [carts]);
+
   const [active, setActive] = useState(1);
   const [current, setCurrent] = useState(0);
 
@@ -77,25 +74,30 @@ const Home = () => {
   useEffect(() => {
     if (data?.length) {
       const result =
-        categoryFilter === "all"
+        categoryFilter === "All Item"
           ? data
           : data.filter((e) => e.category === categoryFilter);
       setFilter1(result);
-      setCurrentPage(0)
+      setCurrentPage(0);
     }
   }, [categoryFilter, data]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   if (loading)
     return (
-      <>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+        }}
+      >
         <div
           style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
             margin: "50px",
             fontSize: "32px",
+            paddingTop: "20px",
           }}
         >
           Loading...
@@ -110,20 +112,14 @@ const Home = () => {
             },
           }}
         />
-      </>
+      </div>
     );
   if (error) return <div>Error: {error}</div>;
 
   return (
     <>
-      <Header />
-      {/* <Between /> */}
-      {/* Between */}
       <div style={{ marginTop: "20px" }}>
-        {/* <div style={{height:"50vh"}}>
-    <img style={{width:"100%",height:"100%"}} src="../../../public/9704568.jpg" alt="" />
-        
-    </div> */}
+        <Header />
         <div
           style={{
             position: "relative",
@@ -136,6 +132,7 @@ const Home = () => {
             src={images[current]}
             style={{ width: "100%", height: "500px", borderRadius: "10px" }}
             alt={`Slide ${current}`}
+            loading="lazy"
           />
           <h1
             style={{
@@ -191,7 +188,6 @@ const Home = () => {
             <button className="shopnow">Shop Now</button>
           </Link>
         </div>
-        {/*  */}
         <div
           className=""
           style={{
@@ -199,18 +195,18 @@ const Home = () => {
             justifyContent: "space-between",
             paddingTop: "20px",
             width: "100%",
+            gap: "10px",
           }}
         >
-          <div style={{ width: "100%", borderRight: "1px solid #000000" }}>
+          <div style={{ width: "100%" }}>
             <p
               onClick={() => {
                 setActive(1);
-                setCategoryFilter("all");
+                setCategoryFilter("All Item");
               }}
               className={`p  ${active === 1 ? `active` : null}`}
               style={{
                 width: "100%",
-                background: "#f1f173",
                 height: "65px",
                 display: "flex",
                 alignItems: "center",
@@ -226,7 +222,7 @@ const Home = () => {
             <div
               style={{
                 width: "100%",
-                borderBottom: "2px solid",
+                // borderBottom: "2px solid",
                 paddingBottom: "7px",
                 borderBottomLeftRadius: "10px",
                 borderBottomRightRadius: "10px",
@@ -235,7 +231,7 @@ const Home = () => {
             ></div>
           </div>
 
-          <div style={{ width: "100%", borderRight: "1px solid #000000" }}>
+          <div style={{ width: "100%" }}>
             <p
               onClick={() => {
                 setActive(2);
@@ -244,7 +240,6 @@ const Home = () => {
               className={`p  ${active === 2 ? `active` : null}`}
               style={{
                 width: "100%",
-                background: "#f1f173",
                 height: "65px",
                 display: "flex",
                 alignItems: "center",
@@ -258,7 +253,7 @@ const Home = () => {
             <div
               style={{
                 width: "100%",
-                borderBottom: "2px solid",
+                // borderBottom: "2px solid",
                 paddingBottom: "7px",
                 borderBottomLeftRadius: "10px",
                 borderBottomRightRadius: "10px",
@@ -266,7 +261,7 @@ const Home = () => {
               }}
             ></div>
           </div>
-          <div style={{ width: "100%", borderRight: "1px solid #000000" }}>
+          <div style={{ width: "100%" }}>
             <p
               onClick={() => {
                 setActive(3);
@@ -275,7 +270,6 @@ const Home = () => {
               className={`p  ${active === 3 ? `active` : null}`}
               style={{
                 width: "100%",
-                background: "#f1f173",
                 height: "65px",
                 display: "flex",
                 alignItems: "center",
@@ -289,7 +283,7 @@ const Home = () => {
             <div
               style={{
                 width: "100%",
-                borderBottom: "2px solid",
+                // borderBottom: "2px solid",
                 paddingBottom: "7px",
                 borderBottomLeftRadius: "10px",
                 borderBottomRightRadius: "10px",
@@ -306,7 +300,6 @@ const Home = () => {
               className={`p  ${active === 4 ? `active` : null}`}
               style={{
                 width: "100%",
-                background: "#f1f173",
                 height: "65px",
                 display: "flex",
                 alignItems: "center",
@@ -322,7 +315,7 @@ const Home = () => {
             <div
               style={{
                 width: "100%",
-                borderBottom: "2px solid",
+                // borderBottom: "2px solid",
                 paddingBottom: "7px",
                 borderBottomLeftRadius: "10px",
                 borderBottomRightRadius: "10px",
@@ -331,13 +324,10 @@ const Home = () => {
             ></div>
           </div>
         </div>
-        <hr />
       </div>
-      {/* Between */}
-
       <div style={{ height: "100px" }}>
         <div style={{ paddingTop: "15px" }}>
-          <h1>All Item</h1>
+          <h1 style={{ textTransform: "capitalize" }}>{categoryFilter}</h1>
           <hr style={{ width: "140px", height: "1px" }} />
           <div
             style={{
@@ -345,101 +335,18 @@ const Home = () => {
               flexDirection: "row",
               justifyContent: "space-between",
               flexWrap: "wrap",
-              gap: "1px",
+              gap: "15px",
               marginTop: "10px",
             }}
           >
             {currentItems.map((item) => {
               return (
-                <div
-                  className="product"
-                  key={item.title}
-                  style={{ width: "20%", margin: "20px", height: "45%" }}
-                  onClick={() => addToCart(item)}
-                >
-                  <img
-                    src={item.image}
-                    alt=""
-                    style={{ width: "100%", height: "200px" }}
-                  />
-
-                  <p
-                    className="rating"
-                    style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      marginTop: "10px",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    <Rating
-                      className="rating"
-                      name="half-rating-read"
-                      defaultValue={item.rating}
-                      precision={0.5}
-                      readOnly
-                    />
-                  </p>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <p
-                      className="productTitle"
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        fontSize: "18px",
-                      }}
-                    >
-                      {item.title}
-                    </p>
-                    <p
-                      className="price"
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        fontSize: "32px",
-                        color: "#9c9c72",
-                      }}
-                    >
-                      {item.price}$
-                    </p>
-                  </div>
-                  <button
-                    style={{
-                      background: "yellow",
-                      width: "100px",
-                      height: "35px",
-                      marginTop: "5px",
-                      border: "none",
-                      borderRadius: "50px",
-                      fontSize: "15px",
-                    }}
-                    onClick={() => addToCart(item)}
-                  >
-                    Add To Cart
-                  </button>
+                <div key={item.price} style={{ marginBottom: "20px" }}>
+                  <Product item={item} addToCart={addToCart} />
                 </div>
               );
             })}
           </div>
-          {/* <Stack
-            spacing={2}
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              margin: "20px",
-              marginTop: "85px",
-            }}
-          >
-            <Pagination count={10} />
-          </Stack> */}
           <ReactPaginate
             previousLabel={"<"}
             nextLabel={">"}

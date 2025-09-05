@@ -1,19 +1,18 @@
 import About from "../about/About";
 import Footer from "../footer/Footer";
-import Header from "./Header";
 import "../main/Home.css";
-import { useEffect, useState } from "react";
-import { LinearProgress, Pagination, Rating, Stack } from "@mui/material";
+import { useContext, useEffect, useState } from "react";
+import { LinearProgress } from "@mui/material";
 import axios from "axios";
-import { RxPerson } from "react-icons/rx";
 import { RiSearch2Line } from "react-icons/ri";
 import { LiaShoppingCartSolid } from "react-icons/lia";
 import { Link } from "react-router-dom";
-import { signInWithPopup } from "firebase/auth";
-import { auth, provider } from "../header/firebase";
+import Product from "../main/Product";
+import { CartContext } from "../../_context/CartContext";
 
 // @ts-ignore
 const Search = () => {
+  const { carts, setCarts } = useContext(CartContext);
   const [search, setSearch] = useState(null);
   const [data, setData] = useState([]);
   const [searchProduct, setSearchProduct] = useState([]);
@@ -38,7 +37,7 @@ const Search = () => {
     const exists = cart.find((item) => item.title === product.title);
     if (!exists) {
       setCart([...cart, product]);
-      //   setCheck([...cart, product])
+      setCarts([...cart, product]);
     }
   };
   useEffect(() => {
@@ -49,48 +48,16 @@ const Search = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   useEffect(() => {
-    const result =
-      searchProduct.length === 0
-        ? data
-        : data?.filter((e) => e.category.toLowerCase().startsWith(search));
-    setSearchProduct(result);
+    if (!search || search.trim() === "") {
+      setSearchProduct(data);
+    } else {
+      const result = data?.filter((e) =>
+        e.title.toUpperCase().includes(search.toUpperCase())
+      );
+      setSearchProduct(result);
+    }
   }, [search, data]);
-  const [user, setUser] = useState(null);
   console.log(search);
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-  const handleGoogleLogin = async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const isGmail =
-        user.email.endsWith("@gmail.com") ||
-        user.email.endsWith("@googlemail.com");
-      const isVerified = user.emailVerified;
-      if (isGmail && isVerified) {
-        const userData = {
-          name: user.displayName,
-          email: user.email,
-          photo: user.photoURL,
-        };
-
-        setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
-      } else if (!isVerified) {
-        alert("هذا الحساب لم يتم التحقق من البريد الإلكتروني الخاص به.");
-      } else {
-        alert("يجب استخدام بريد Gmail.");
-      }
-    } catch (error) {
-      alert("حدث خطأ أثناء تسجيل الدخول.");
-      console.error(error);
-    }
-  };
-  console.log(user);
   if (loading)
     return (
       <>
@@ -118,10 +85,6 @@ const Search = () => {
       </>
     );
   if (error) return <div>Error: {error}</div>;
-
-  // if (searchProduct.length === 0) {
-  //     return <div>Not Found</div>
-  // }
   return (
     <div>
       {/* Header */}
@@ -138,7 +101,7 @@ const Search = () => {
             <img
               className="logo"
               src="/Make-6-7-2025.jpg"
-              alt=""
+              alt="Logo"
               style={{ width: "250px" }}
             />
           </Link>
@@ -152,11 +115,12 @@ const Search = () => {
             }}
           >
             <RiSearch2Line style={{ fontSize: "32px" }} />
-            <Link style={{ width: "90%" }} to={"/Search"}>
+            <Link style={{ width: "90%" }} to={`/Search?query=${search}`}>
               <input
                 onChange={(e) => setSearch(e.target.value)}
                 type="text"
                 placeholder="Search"
+                value={search}
                 style={{
                   width: "89%",
                   padding: "12px",
@@ -176,17 +140,6 @@ const Search = () => {
               alignItems: "center",
             }}
           >
-            {user ? (
-              <img
-                style={{ width: "50px", borderRadius: "50px" }}
-                src={user.photo}
-                alt="User"
-              />
-            ) : (
-              <Link onClick={handleGoogleLogin} to={""}>
-                <RxPerson />
-              </Link>
-            )}
             <span style={{ position: "relative" }}>
               <Link to="/CheckOut">
                 <LiaShoppingCartSolid
@@ -197,12 +150,13 @@ const Search = () => {
                 style={{
                   minWidth: "20px",
                   textAlign: "center",
-                  backgroundColor: "",
-                  padding: "2.5px",
+                  backgroundColor: "#ff4d4d",
+                  color: "#fff",
+                  padding: "2.5px 5px",
                   position: "absolute",
                   top: "-5px",
                   right: "-12px",
-                  fontSize: "17px",
+                  fontSize: "14px",
                   lineHeight: "1",
                   borderRadius: "10px",
                   fontWeight: "bold",
@@ -235,80 +189,7 @@ const Search = () => {
               <div>Not Found</div>
             ) : (
               searchProduct.map((item) => {
-                return (
-                  <div
-                    className="product"
-                    key={item.title}
-                    style={{ width: "20%", margin: "20px" }}
-                    onClick={() => addToCart(item)}
-                  >
-                    <img
-                      src={item.image}
-                      alt=""
-                      style={{ width: "100%", height: "200px" }}
-                    />
-                    <p
-                      className="rating"
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        marginTop: "10px",
-                        marginBottom: "10px",
-                      }}
-                    >
-                      <Rating
-                        name="half-rating-read"
-                        defaultValue={item.rating}
-                        precision={0.5}
-                        readOnly
-                      />
-                    </p>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <p
-                        className="productTitle"
-                        style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          fontSize: "18px",
-                        }}
-                      >
-                        {item.title}
-                      </p>
-                      <p
-                        className="price"
-                        style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          fontSize: "32px",
-                          color: "#9c9c72",
-                        }}
-                      >
-                        {item.price}$
-                      </p>
-                    </div>
-                    <button
-                      style={{
-                        background: "yellow",
-                        width: "100px",
-                        height: "35px",
-                        marginTop: "5px",
-                        border: "none",
-                        borderRadius: "50px",
-                        fontSize: "15px",
-                      }}
-                      onClick={() => addToCart(item)}
-                    >
-                      Add To Cart
-                    </button>
-                  </div>
-                );
+                return <Product item={item} addToCart={addToCart} />;
               })
             )}
           </div>

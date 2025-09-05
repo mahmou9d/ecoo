@@ -61,13 +61,14 @@ const About = () => {
       style={{
         marginTop: "90px",
         position: "relative",
-        border: "1px solid yellow",
+        // border: "1px solid yellow",
       }}
     >
       <img
         style={{ width: "100%", height: "100%", borderRadius: "5px" }}
-        src="/—Pngtree—shopping mall supermarket selection merchandise_1048684 (1).jpg"
+        src="/—Pngtree—shopping mall supermarket selection merchandise_1048684 (1).webp"
         alt=""
+        loading="lazy"
       />
       <div
         className="Aboutemail"
@@ -95,16 +96,20 @@ const About = () => {
               fontSize: "16px",
             }}
           /> */}
-          <input id="email" type="email" name="email"  style={{
-             
+          <input
+            id="email"
+            type="email"
+            name="email"
+            style={{
               height: "3px",
               borderRadius: "50px",
               outline: "none",
               padding: "13px",
               border: "none",
               // fontSize: "16px",
-               widows: "-webkit-fill-available !important",
-            }} />
+              widows: "-webkit-fill-available !important",
+            }}
+          />
           <ValidationError prefix="Email" field="email" errors={state.errors} />
           <button
             type="submit"
@@ -116,7 +121,7 @@ const About = () => {
               fontSize: "15px",
               border: "none",
               borderRadius: "15px",
-              marginTop:"10px"
+              marginTop: "10px",
             }}
           >
             Submit
